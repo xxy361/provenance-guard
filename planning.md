@@ -11,7 +11,7 @@ A backend system that any creative sharing platform could plug into to classify 
 | X      | **M1 — Understand & define architecture**   | architecture narrative, 2 signals + blind spots, API contract, diagram |
 | X      | **M2 — Write the spec**                     | this `planning.md`                                                     |
 | X      | **M3 — Submission endpoint + first signal** | Flask app, `POST /submit`, Groq signal, basic audit log, `GET /log`    |
-|        | **M4 — Second signal + scoring**            | stylometric signal, confidence scoring, both scores in the log         |
+| X      | **M4 — Second signal + scoring**            | stylometric signal, confidence scoring, both scores in the log         |
 |        | **M5 — Production layer**                   | transparency labels, `POST /appeal`, rate limiting, complete log       |
 |        | **M6 — Document & walk through**            | README (all required sections)                                         |
 

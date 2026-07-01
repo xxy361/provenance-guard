@@ -16,8 +16,10 @@ from datetime import datetime, timezone
 
 from flask import Flask, jsonify, request
 
+import scoring
 from db import get_log, init_log, submit_log
 from detection.llm_signal import llm_signal
+from detection.stylometric_signal import stylometric_signal
 
 app = Flask(__name__)
 app.json.sort_keys = False  # preserve insertion order (audit_log column order) in responses
@@ -46,12 +48,13 @@ def submit():
     # Signal 1: LLM
     llm_score, llm_reasoning = llm_signal(text)
 
-    # TODO Signal 2: stylometric heuristics -> stylometric_score
-    # TODO combine into calibrated confidence score (false-positive-averse)
+    # Signal 2: stylometric heuristics
+    stylometric_score = stylometric_signal(text)
+
+    # Combine into a calibrated, false-positive-averse confidence + attribution
+    confidence, attribution = scoring.score(llm_score, stylometric_score)
+
     # TODO map confidence -> three-category transparency label
-    stylometric_score = None
-    confidence = None
-    attribution = None
     label = None
 
     submit_log(
