@@ -13,7 +13,7 @@ A backend system that any creative sharing platform could plug into to classify 
 | X      | **M3 — Submission endpoint + first signal** | Flask app, `POST /submit`, Groq signal, basic audit log, `GET /log`    |
 | X      | **M4 — Second signal + scoring**            | stylometric signal, confidence scoring, both scores in the log         |
 | X      | **M5 — Production layer**                   | transparency labels, `POST /appeal`, rate limiting, complete log       |
-|        | **M6 — Document & walk through**            | README (all required sections)                                         |
+| X      | **M6 — Document & walk through**            | README (all required sections)                                         |
 
 ## 2. Tools and Setup
 
@@ -158,7 +158,7 @@ APPEAL
 - very short texts are difficult to get a stable stylometric score since there isn't much structure to work with
 - AI is trained on human data, it is possible that sometimes people just write like AI (they could be too formal. Or their brains have been rewired because they read too many AI-generated texts. Yikes for humanity, you and me non-exclusive...)
 
-## 6. AI Tool Plan
+## 6. AI Usage
 
 **M3 — submission endpoint + first signal**
 

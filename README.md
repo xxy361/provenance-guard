@@ -151,13 +151,15 @@ APPEAL
 
 ## 6. AI Tool Plan
 
+**Instance 1**: I pointed Claude to the `planning.md`, and it has  the Architecture (Submission Flow and the diagram), Multi-Signal Detection, and Submission Endpoint sections in the context of the session. I told it to set up the audit log and that every call to the submission endpoint should write a structured entry to the log. AI didn't follow the exact order of the fields/columns of how I wanted the endpoints (both the submit and log) to output, even though the right order is set up for the audit log. I pointed AI to the structure of the audit log and told it to follow the exact order. It was initially ordering the fields by ascending alphabetical order of the field names. It was not necessarily a logic error, but it is a lot easier for human to debug when reviewing the output.
 
+**Instance 2:** I gave Claude the Architecture (both Flows and the diagram), Transparency Label, and Appeals Workflow sections, and told it implement the labeling and appeal endpoint. I had a `score.py` set up for combined scoring, and then Claude put the labeling function into this file. I understand that they are closely related, but I prefer that each feature has a separate file for modularity. I told it move the labeling function into its own file and move `score.py` into a `detection` folder where the files for the two signal detection functions are. It could have been manually done, but it was convenient to have Claude to refractor the imports without manually looking for them.
 
 ## 7. Spec Reflection
 
-**One way the spec helped:** Writing the exact structure for audit log, as well as the input/output for the endpoints in `planning.md` was very helpful for implementation. When using AI for implementation, it was able to write code following the exact structure. This is also shown in the comments created by AI, all the fields are pretty much the same as the planning.md descriptions.
+**One way the spec helped:** Writing the exact structure for audit log, as well as the input/output for the endpoints in `planning.md` was very helpful for implementation. When using AI for implementation, it was able to write code following the exact structure for the individual modules.
 
-**One divergence and why:** AI didn't follow the exact order of the fields/columns of how I wanted the endpoints (both the submit and log) to output, even though the right order is set up for the audit log. I pointed AI to the structure of the audit log and told it to follow the exact order. It was initially ordering the fields by ascending alphabetical order of the field names. It was not necessarily a logic error, but it is a lot easier for human to debug when reviewing the output.
+**One divergence and why:** The requirements for projects talked about a "calibrated" scoring function, but the actual implemented function is a simple weighted function based on set variables. A better way would probably be testing out the weights through a sample dataset, but setting up a sample dataset is beyond the scope for current required phases.
 
 ## 8. Documentation
 
