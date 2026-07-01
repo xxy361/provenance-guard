@@ -86,7 +86,7 @@ Output:
 
 ### M4: Stylometric Signal + Combined Scoring
 
-**Same test from M3**
+**1. Same test from M3**
 ```
 {
     "content_id": "0fc29f09-a0e3-4eae-9d6d-d5db9f703733",
@@ -102,7 +102,7 @@ Output:
 ```
 Stylo score is uncertain, while LLM score is human.
 
-**Clearly AI-generated (should score high)**
+**2. Clearly AI-generated (should score high)**
 ```
 curl -s -X POST http://127.0.0.1:5000/submit \
   -H "Content-Type: application/json" \
@@ -123,7 +123,7 @@ curl -s -X POST http://127.0.0.1:5000/submit \
 }
 ```
   
-**Clearly human-written (should score low)**
+**3. Clearly human-written (should score low)**
 ```
 curl -s -X POST http://127.0.0.1:5000/submit \
   -H "Content-Type: application/json" \
@@ -145,7 +145,7 @@ curl -s -X POST http://127.0.0.1:5000/submit \
 }
 ```
 
-**Borderline: formal human writing (may score mid-high on stylometrics)**
+**4. Borderline: formal human writing (may score mid-high on stylometrics)**
 ``` 
 curl -s -X POST http://127.0.0.1:5000/submit \
   -H "Content-Type: application/json" \
@@ -166,7 +166,7 @@ curl -s -X POST http://127.0.0.1:5000/submit \
 }
 ```
 
-**Borderline: lightly edited AI output (should ideally score mid-range)**
+**5. Borderline: lightly edited AI output (should ideally score mid-range)**
 ```
 curl -s -X POST http://127.0.0.1:5000/submit \
   -H "Content-Type: application/json" \
@@ -187,3 +187,125 @@ curl -s -X POST http://127.0.0.1:5000/submit \
 }
 ```
 
+### M5: Production Layer
+
+**Appeal Workflow**
+```
+curl -s -X POST http://localhost:5000/appeal \
+  -H "Content-Type: application/json" \
+  -d '{"content_id": "28b459eb-2ebe-4a14-a412-e4d1033f9494", "creator_reasoning": "I wrote this myself from personal experience. I am a non-native English speaker and my writing style may appear more formal than typical."}' | python -m json.tool
+```
+
+Output:
+```
+{
+    "content_id": "28b459eb-2ebe-4a14-a412-e4d1033f9494",
+    "status": "under_review",
+    "message": "Your appeal has been submitted and is under review."
+}
+```
+
+**Rate Limiting**
+```
+for i in $(seq 1 12); do
+  curl -s -o /dev/null -w "%{http_code}\n" -X POST http://localhost:5000/submit \
+	-H "Content-Type: application/json" \
+	-d '{"text": "This is a test submission for rate limit testing purposes only.", "creator_id": "ratelimit-test"}'
+done
+```
+
+Output:
+```
+200
+200
+200
+200
+200
+200
+200
+200
+200
+200
+429
+429
+```
+
+**Complete Audit Log**
+
+Rerun the 5 tests from M4 and the Appeal test above (note the audit log returns by most recent, so the first listed is the last test):
+```
+{
+    "entries": [
+        {
+            "content_id": "21c5d0b4-aa72-4da2-8931-cac648cf9cd4",
+            "creator_id": "tester",
+            "content_text": "I've been thinking a lot about remote work lately. There are genuine tradeoffs \u2014 flexibility and no commute on one side, isolation and blurred work-life boundaries on the other. Studies show productivityvaries widely by individual and role type.",
+            "create_ts": "2026-07-01T04:45:08.489488+00:00",
+            "llm_score": 0.7,
+            "llm_reasoning": "The text's balanced view and formal vocabulary suggest AI influence.",
+            "stylometric_score": 0.5,
+            "attribution": "uncertain",
+            "confidence": 0.62,
+            "status": "under_review",
+            "creator_reasoning": "I wrote this myself from personal experience. I am a non-native English speaker and my writing style may appear more formal than typical.",
+            "appeal_ts": "2026-07-01T04:46:36.955989+00:00"
+        },
+        {
+            "content_id": "0dfa7f08-9e14-499d-91fa-4ffdb81f063b",
+            "creator_id": "tester",
+            "content_text": "The relationship between monetary policy and asset price inflation has been extensively studied in the literature. Central banks face a fundamental tension between their mandate for price stability and the unintended consequences of prolonged low interest rates on equity and real estate valuations.",
+            "create_ts": "2026-07-01T04:45:08.257173+00:00",
+            "llm_score": 0.8,
+            "llm_reasoning": "The text uses overly formal vocabulary and maintains a tightly focused, balanced discussion.",
+            "stylometric_score": 0.51592684897186,
+            "attribution": "uncertain",
+            "confidence": 0.686370739588744,
+            "status": "classified",
+            "creator_reasoning": null,
+            "appeal_ts": null
+        },
+        {
+            "content_id": "66f8b3f4-a886-4573-9ce8-0af3b89e6add",
+            "creator_id": "tester",
+            "content_text": "ok so i finally tried that new ramen place downtown and honestly? underwhelming. the broth was fine but they put WAY too much sodium in it and i was thirsty for like three hours after. my friend got the spicyversion and said it was better. probably won't go back unless someone drags me there",
+            "create_ts": "2026-07-01T04:45:07.857138+00:00",
+            "llm_score": 0.1,
+            "llm_reasoning": "The text contains informal language, personal opinions, and specific details, indicatinga human writer.",
+            "stylometric_score": 0.3314400938439475,
+            "attribution": "likely_human",
+            "confidence": 0.19257603753757901,
+            "status": "classified",
+            "creator_reasoning": null,
+            "appeal_ts": null
+        },
+        {
+            "content_id": "57ce93b0-690b-4609-b497-ca7c78f06e8d",
+            "creator_id": "tester",
+            "content_text": "Artificial intelligence represents a transformative paradigm shift in modern society. It is important to note that while the benefits of AI are numerous, it is equally essential to consider the ethical implications. Furthermore, stakeholders across various sectors must collaborate to ensure responsible deployment.",
+            "create_ts": "2026-07-01T04:45:07.449132+00:00",
+            "llm_score": 0.9,
+            "llm_reasoning": "The text's formal vocabulary and balanced perspective suggest AI authorship.",
+            "stylometric_score": 0.47311061671087035,
+            "attribution": "likely_ai",
+            "confidence": 0.7292442466843482,
+            "status": "classified",
+            "creator_reasoning": null,
+            "appeal_ts": null
+        },
+        {
+            "content_id": "5999cdc2-df33-40d7-be58-8dd25fc0b14e",
+            "creator_id": "test-user-1",
+            "content_text": "The sun dipped below the horizon, painting the sky in hues of amber and rose. I sat on the porch, coffee in hand, watching the neighborhood slowly go quiet.",
+            "create_ts": "2026-07-01T04:40:47.914118+00:00",
+            "llm_score": 0.2,
+            "llm_reasoning": "The text's descriptive and personal tone suggests human authorship.",
+            "stylometric_score": 0.5,
+            "attribution": "likely_human",
+            "confidence": 0.32,
+            "status": "classified",
+            "creator_reasoning": null,
+            "appeal_ts": null
+        }
+    ]
+}
+```

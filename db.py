@@ -71,6 +71,42 @@ def get_log(limit=50):
     return [dict(row) for row in rows]
 
 
+def get_entry(content_id):
+    """Return one audit-log entry by content_id as a dict, or None if absent."""
+    db = get_db()
+    row = db.execute(
+        "SELECT * FROM audit_log WHERE content_id = ?",
+        (content_id,),
+    ).fetchone()
+    return dict(row) if row else None
+
+
+def appeal_log(content_id, creator_reasoning, appeal_ts):
+    """Record an appeal against an existing entry.
+
+    Sets status -> "under_review" and fills the previously-null
+    creator_reasoning and appeal_ts columns. Returns the number of rows
+    updated (0 if content_id is unknown).
+    """
+    db = get_db()
+    cur = db.execute(
+        """
+        UPDATE audit_log
+        SET status = 'under_review',
+            creator_reasoning = :creator_reasoning,
+            appeal_ts = :appeal_ts
+        WHERE content_id = :content_id
+        """,
+        {
+            "content_id": content_id,
+            "creator_reasoning": creator_reasoning,
+            "appeal_ts": appeal_ts,
+        },
+    )
+    db.commit()
+    return cur.rowcount
+
+
 def submit_log(record):
     """Insert one structured submission entry into the audit log.
 
