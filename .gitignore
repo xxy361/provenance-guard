@@ -18,5 +18,9 @@ env/
 # macOS
 .DS_Store
 
+# Local Database
+*.db
+
 # Miscs
 .obsidian/
+

@@ -10,7 +10,7 @@ A backend system that any creative sharing platform could plug into to classify 
 | ------ | ------------------------------------------- | ---------------------------------------------------------------------- |
 | X      | **M1 — Understand & define architecture**   | architecture narrative, 2 signals + blind spots, API contract, diagram |
 | X      | **M2 — Write the spec**                     | this `planning.md`                                                     |
-|        | **M3 — Submission endpoint + first signal** | Flask app, `POST /submit`, Groq signal, basic audit log, `GET /log`    |
+| X      | **M3 — Submission endpoint + first signal** | Flask app, `POST /submit`, Groq signal, basic audit log, `GET /log`    |
 |        | **M4 — Second signal + scoring**            | stylometric signal, confidence scoring, both scores in the log         |
 |        | **M5 — Production layer**                   | transparency labels, `POST /appeal`, rate limiting, complete log       |
 |        | **M6 — Document & walk through**            | README (all required sections)                                         |
@@ -56,7 +56,7 @@ The user can contest the classification using `POST /appeal`, with reasoning and
 
 ```
 APPEAL
-  client --{content_id, appeal_reasoning}--> POST /appeal
+  client --{content_id, creator_reasoning}--> POST /appeal
      --> set status = under_review --> Audit Log (appeal entry) --> {confirmation}
 ```
 
@@ -126,12 +126,12 @@ APPEAL
 
 - **Purpose:** a mechanism for creators to contest a classification. Automated re-classification is not required.
 - **Endpoints**: `POST /appeal`
-- **Accepts**: `{content_id, appeal_reasoning}` (the user provides the look up id for the text they want to appeal for along with their reasoning)
+- **Accepts**: `{content_id, creator_reasoning}` (the user provides the look up id for the text they want to appeal for along with their reasoning)
 - **Returns**: `{content_id, status: "under_review", message}` (a confirmation that appeal has been submitted)
 - **Decisions:** 
 	- look up the text to appeal by `content_id` in the audit log. The entry contains the original decision
 	- set status from `classified` to `under_review`
-	- fill in the `appeal_reasoning` and `appeal_ts` columns which are originally `null`
+	- fill in the `creator_reasoning` and `appeal_ts` columns which are originally `null`
 	- a reviewer opening the queue sees the original text, attribution, both signal scores, combined confidence, the label shown, the creator's reasoning, and timestamps
 - **Limitation:** in real practice, only the owner of the original text (authenticated user) should be able to submit an appeal request. This is outside the scope of requirements at this point.
 
@@ -148,7 +148,7 @@ APPEAL
 
 - **Purpose:** a structured record that captures timestamp, content ID, attribution result, confidence score, both individual signal scores, and whether an appeal has been filed.
 - **Endpoints**: `GET /log`
-- **Returns:** `{entries: [...]}` where each entry contains `creator_id, content_id, content_text, create_ts, llm_score, llm_reasoning, stylometric_score, attribution, confidence, status, appeal_reasoning, appeal_ts`.
+- **Returns:** `{entries: [...]}` where each entry contains `creator_id, content_id, content_text, create_ts, llm_score, llm_reasoning, stylometric_score, attribution, confidence, status, creator_reasoning, appeal_ts`.
 - **Design:** a SQLite  table keyed by `content_id`, where `/submit` inserts a row and`/appeal` updates it
 
 ## 5. Edge Cases & Known Limitations

@@ -3,6 +3,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# --- Flask ---
+FLASK_HOST = os.getenv("FLASK_HOST", "localhost")
+FLASK_PORT = os.getenv("FLASK_PORT", 5000)
+
 # --- LLM ---
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 LLM_MODEL = "llama-3.3-70b-versatile"
